@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meltwater Opportunity Radar — Interactive Prototype</title>
+<style>
+:root{
+  --navy:#091C2C; --navy2:#102B3F; --teal:#00B5AD; --teal2:#13C7C0; --purple:#7B61FF;
+  --bg:#F5F8FB; --card:#FFFFFF; --text:#112638; --muted:#6C7D8B; --line:#DDE6ED;
+  --green:#16A36A; --amber:#F4A340; --red:#E85D75; --shadow:0 10px 28px rgba(15,42,61,.08);
+}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit} button{cursor:pointer}
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+.sidebar{background:linear-gradient(180deg,var(--navy),#06141F);color:#fff;padding:22px 16px;position:sticky;top:0;height:100vh}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;margin:2px 8px 26px}.mark{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,var(--teal),var(--purple));position:relative}.mark:after{content:"";position:absolute;inset:6px;border:2px solid #fff;border-radius:50%}
+.nav-title{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#7FA0B5;margin:20px 12px 8px}.nav-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;color:#C9D9E4;margin:4px 0;font-size:14px}.nav-item.active,.nav-item:hover{background:#17354A;color:#fff}.nav-dot{width:8px;height:8px;border-radius:50%;background:#6F8B9E}.nav-item.active .nav-dot{background:var(--teal2);box-shadow:0 0 0 4px rgba(19,199,192,.12)}
+.suite-nav{margin-top:8px}.suite-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:9px;color:#C8D7E2;margin:2px 0;font-size:14px;font-weight:600}.suite-item:hover{background:#132F42;color:#fff}.suite-item.active{background:#17354A;color:#fff;font-weight:800}.suite-icon{width:18px;height:18px;border:1.5px solid #7894A7;border-radius:5px;display:grid;place-items:center;font-size:10px;color:#9DB3C1}.suite-item.active .suite-icon{border-color:#4AD6CF;color:#4AD6CF}.subnav{margin:5px 0 12px 14px;padding-left:14px;border-left:1px solid #2C485B}.subnav .nav-item{padding:8px 10px;font-size:12.5px;margin:2px 0;border-radius:8px}.subnav .nav-dot{width:6px;height:6px}.suite-divider{height:1px;background:#203C4F;margin:13px 6px}.sidebar{overflow-y:auto}.sidebar::-webkit-scrollbar{width:5px}.sidebar::-webkit-scrollbar-thumb{background:#2A475A;border-radius:10px}
+.side-foot{position:absolute;left:16px;right:16px;bottom:20px;padding:13px;border:1px solid #25455A;border-radius:12px;color:#AFC2CF;font-size:12px}.side-foot b{display:block;color:#fff;margin-bottom:3px}
+.main{min-width:0}.topbar{height:74px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:20}.top-title{font-weight:800;font-size:18px}.top-sub{font-size:12px;color:var(--muted);margin-top:2px}.top-actions{display:flex;align-items:center;gap:12px}
+.live{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--green);font-weight:700;background:#EAF8F2;padding:7px 10px;border-radius:999px}.pulse{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 0 0 rgba(22,163,106,.4);animation:pulse 1.8s infinite}@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(22,163,106,0)}}
+.brand-wrap{position:relative}.brand-btn{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 11px;min-width:210px;text-align:left}.brand-avatar{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:white;font-weight:800;font-size:12px;background:linear-gradient(135deg,var(--teal),var(--purple));overflow:hidden;flex:0 0 34px}.brand-avatar.has-logo{background:#fff;border:1px solid #E1E8ED}.brand-avatar img{width:100%;height:100%;object-fit:contain;display:block}.brand-meta{flex:1}.brand-meta b{display:block;font-size:13px}.brand-meta span{font-size:11px;color:var(--muted)}.caret{color:#8094A3}
+.brand-menu{position:absolute;right:0;top:48px;width:280px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:8px;display:none;z-index:30}.brand-menu.show{display:block}.brand-option{display:flex;gap:10px;align-items:center;padding:9px;border-radius:10px}.brand-option:hover{background:#F3F7FA}.brand-option.active{background:#EAF8F7}.brand-option .info{flex:1}.brand-option b{display:block;font-size:13px}.brand-option small{color:var(--muted)}.add-brand{width:100%;border:1px dashed #9CB4C3;background:#F8FBFD;border-radius:10px;padding:10px;color:#31546A;font-weight:700;margin-top:4px}
+.content{padding:26px;max-width:1500px;margin:0 auto}.page{display:none}.page.active{display:block}.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}.hero h1{font-size:28px;margin:0 0 6px}.hero p{margin:0;color:var(--muted);max-width:760px}.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.filter-control{display:flex;flex-direction:column;gap:4px}.filter-control label{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:.03em;text-transform:uppercase}.filter-select{min-width:190px;border:1px solid #CCD9E2;background:#fff;color:#153047;border-radius:11px;padding:10px 34px 10px 12px;font-size:13px;font-weight:700;outline:none;box-shadow:0 2px 7px rgba(15,42,61,.04)}.filter-select:focus{border-color:#21BFB7;box-shadow:0 0 0 3px rgba(0,181,173,.10)}.filter-summary{font-size:11px;color:var(--muted);margin-top:5px}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 11px;font-size:12px;color:#476173}.chip.active{background:#EAF8F7;border-color:#B9E9E5;color:#087A76;font-weight:800}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.metric{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px;box-shadow:0 3px 10px rgba(17,38,56,.03)}.metric-top{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}.metric-value{font-size:27px;font-weight:800;margin:7px 0 2px}.delta{font-size:12px;font-weight:700;color:var(--green)}.delta.down{color:var(--red)}
+.layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,.8fr);gap:16px}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 16px rgba(15,42,61,.04);overflow:hidden}.panel-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.panel-head h3{font-size:15px;margin:0}.panel-head span{color:var(--muted);font-size:12px}.opp-list{padding:7px}.opp-card{padding:14px;border-radius:13px;border:1px solid transparent;display:grid;grid-template-columns:1fr auto;gap:12px;margin:5px 0;transition:.18s}.opp-card:hover{border-color:#CFE0EA;background:#FAFCFD;transform:translateY(-1px)}.opp-card.selected{background:#F0FBFA;border-color:#BCECE8}.opp-title{display:flex;align-items:center;gap:8px;font-weight:800}.type{font-size:10px;padding:4px 7px;border-radius:999px;background:#EEF1FF;color:#6552D9;font-weight:800}.opp-desc{font-size:12px;color:var(--muted);margin:4px 0 9px}.signals{display:flex;gap:8px;flex-wrap:wrap}.signal{font-size:10px;color:#567184;background:#F2F6F8;padding:4px 7px;border-radius:6px}.score{text-align:right}.score-num{font-size:25px;font-weight:800}.score-label{font-size:10px;color:var(--muted)}.score-high{color:var(--green)}.score-med{color:var(--amber)}
+.insight{padding:18px}.insight h4{margin:0 0 5px;font-size:19px}.insight p{color:var(--muted);font-size:13px;line-height:1.55}.radar-box{height:150px;border:1px solid #E3EBF0;background:linear-gradient(180deg,#FBFDFE,#F2F8FA);border-radius:13px;display:flex;align-items:flex-end;gap:6px;padding:15px;margin:14px 0}.bar{flex:1;background:linear-gradient(180deg,var(--teal2),#6ADDD7);border-radius:5px 5px 2px 2px;min-height:8px;transition:.4s}.kv{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.kv div{background:#F6F9FB;border-radius:10px;padding:10px}.kv small{display:block;color:var(--muted);font-size:10px}.kv b{font-size:13px}.primary{border:0;background:linear-gradient(135deg,var(--teal),#009B95);color:#fff;border-radius:10px;padding:10px 14px;font-weight:800;box-shadow:0 7px 16px rgba(0,181,173,.2)}.secondary{border:1px solid var(--line);background:#fff;color:#31546A;border-radius:10px;padding:10px 14px;font-weight:700}.full{width:100%}
+.stepper{display:flex;gap:8px;margin:12px 0 20px}.step{flex:1;background:#E8EEF2;height:5px;border-radius:99px}.step.done{background:var(--teal)}.step.active{background:linear-gradient(90deg,var(--teal) 60%,#E8EEF2 60%)}
+.detail-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.section{padding:18px}.section h3{margin:0 0 12px;font-size:16px}.reason{display:flex;gap:12px;margin:12px 0;padding:12px;background:#F7FAFC;border-radius:12px}.reason-icon{width:32px;height:32px;border-radius:9px;background:#EAF8F7;color:#078A84;display:grid;place-items:center;font-weight:800}.reason b{font-size:13px}.reason p{margin:3px 0 0;font-size:12px;color:var(--muted)}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field label{display:block;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 11px;background:#fff;color:var(--text)}.field textarea{min-height:88px;resize:vertical}.action-check{display:flex;align-items:flex-start;gap:9px;padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px}.action-check input{margin-top:3px}.action-check b{font-size:13px}.action-check span{font-size:11px;color:var(--muted);display:block;margin-top:2px}
+
+.feedback-wrap{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-direction:column;align-items:flex-end}.feedback-trigger{width:34px;height:34px;display:grid;place-items:center;border:1px solid #BFD8E4;background:#F7FBFD;color:#214A61;border-radius:10px;font-weight:900;font-size:18px;line-height:1;cursor:pointer}.feedback-trigger:hover,.feedback-trigger.active{background:#EEF8FA;border-color:#92CEC9;color:#087A76}.feedback-panel{width:100%;margin-top:12px;border:1px solid #D7E5EC;background:#FBFDFE;border-radius:13px;padding:14px;display:none}.feedback-panel.show{display:block}.feedback-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}.feedback-head h4{margin:0;font-size:14px}.feedback-head p{margin:3px 0 0;color:var(--muted);font-size:11px;line-height:1.4}.quick-feedback{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.quick-feedback-btn{border:1px solid transparent;border-radius:13px;padding:13px 10px;text-align:center;cursor:pointer;transition:.18s;min-height:68px;font-family:inherit}.quick-feedback-btn b{display:block;font-size:12px;margin-bottom:5px}.quick-feedback-btn span{display:block;font-size:10px;font-weight:700;color:#445866}.quick-feedback-btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(15,42,61,.08)}.quick-feedback-btn.accept{background:#E4F5EC;color:#087743}.quick-feedback-btn.refine{background:#EAF1FD;color:#1D5CB3}.quick-feedback-btn.snooze{background:#FFF3D8;color:#9A6500}.quick-feedback-btn.dismiss{background:#FDE8EC;color:#B02A45}.feedback-status{font-size:11px;color:var(--green);font-weight:800;margin-top:10px;display:none}.feedback-status.show{display:block}@media(max-width:900px){.quick-feedback{grid-template-columns:1fr 1fr}}.engine-hero{background:linear-gradient(135deg,#0A2436,#123E54);color:#fff;border-radius:18px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden}.engine-hero:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(19,199,192,.12);right:-70px;top:-90px}.engine-hero h1{margin:0 0 7px;font-size:28px}.engine-hero p{margin:0;color:#C9DEE8;max-width:820px;line-height:1.55}.engine-flow{display:grid;grid-template-columns:1fr 90px 1.2fr 90px 1fr;gap:12px;align-items:stretch;margin:16px 0}.engine-node{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:0 4px 16px rgba(15,42,61,.04)}.engine-node h3{margin:0 0 6px;font-size:15px}.engine-node p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}.engine-node.core{border-color:#B7E5E1;background:linear-gradient(180deg,#F6FFFE,#FFFFFF)}.engine-arrow{display:grid;place-items:center;color:#6E8A9B;font-size:24px;font-weight:800}.source-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.source-pill{font-size:10px;font-weight:800;padding:5px 7px;border-radius:999px;background:#F0F6F9;color:#476173}.core .source-pill{background:#E8F8F6;color:#087A76}.engine-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}.engine-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px}.engine-card small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:800}.engine-card h3{margin:5px 0 7px;font-size:15px}.engine-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}.engine-list{margin:10px 0 0;padding:0;list-style:none}.engine-list li{font-size:11px;color:#476173;padding:6px 0;border-top:1px solid #EEF3F6}.engine-list li:first-child{border-top:0}@media(max-width:1050px){.engine-flow{grid-template-columns:1fr}.engine-arrow{transform:rotate(90deg);min-height:34px}.engine-grid{grid-template-columns:1fr}.feedback-grid{grid-template-columns:1fr}}
+.monitor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}.monitor-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px}.monitor-card small{color:var(--muted)}.monitor-card strong{display:block;font-size:24px;margin-top:4px}.activation-list{display:grid;gap:12px}.activation{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px}.activation-top{display:flex;justify-content:space-between;gap:15px}.status{font-size:10px;padding:5px 8px;border-radius:999px;background:#EAF8F2;color:#0B8A5A;font-weight:800;height:max-content}.status.warn{background:#FFF4E5;color:#B46B10}.progress{height:8px;background:#E7EDF1;border-radius:99px;overflow:hidden;margin:11px 0}.progress > div{height:100%;background:linear-gradient(90deg,var(--teal),var(--purple));border-radius:99px;transition:.5s}.activation-meta{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}.activation-meta div{background:#F7FAFC;border-radius:9px;padding:9px}.activation-meta small{display:block;color:var(--muted);font-size:9px}.activation-meta b{font-size:12px}.impact-up{color:var(--green)}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+.modal-back{position:fixed;inset:0;background:rgba(3,19,29,.45);display:none;place-items:center;z-index:100}.modal-back.show{display:grid}.modal{width:min(460px,92vw);background:#fff;border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.25)}.modal h3{margin:0 0 4px}.modal p{margin:0 0 16px;color:var(--muted);font-size:12px}.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}.toast{position:fixed;right:22px;bottom:22px;background:#0C2638;color:#fff;padding:12px 15px;border-radius:11px;box-shadow:var(--shadow);font-size:12px;transform:translateY(80px);opacity:0;transition:.3s;z-index:200}.toast.show{transform:none;opacity:1}
+@media(max-width:1100px){.metrics{grid-template-columns:repeat(2,1fr)}.layout,.detail-grid{grid-template-columns:1fr}.monitor-grid{grid-template-columns:1fr 1fr}.activation-meta{grid-template-columns:repeat(3,1fr)}}
+/* Compact Radar filters: keep Opportunity type and Timeframe aligned on one row */
+.filters{display:flex;flex-wrap:nowrap;align-items:flex-end;gap:8px;white-space:nowrap}
+.filter-control{min-width:0}
+#typeFilter{min-width:150px;width:150px}
+#timeFilter{min-width:124px;width:124px}
+.filter-select{padding:8px 28px 8px 10px;border-radius:9px;font-size:12px}
+.filter-control label{font-size:9px;margin-bottom:1px}
+@media(max-width:760px){.app{grid-template-columns:1fr}.sidebar{display:none}.topbar{padding:0 14px}.brand-btn{min-width:170px}.content{padding:17px}.hero{display:block}.filters{margin-top:12px;flex-wrap:nowrap;justify-content:flex-start}.metrics,.monitor-grid{grid-template-columns:1fr}.plan-grid{grid-template-columns:1fr}.activation-meta{grid-template-columns:1fr 1fr}.live{display:none}}
+
+
+.sidebar-toggle{position:fixed;top:8px;left:204px;z-index:9999;width:22px;height:22px;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:#17354A;color:#D9E7EF;box-shadow:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;line-height:1;transition:left .22s ease,background .18s ease,transform .18s ease}
+.sidebar-toggle:hover{background:#21475E;transform:none}
+.logo{height:42px;margin:0 30px 19px 2px;display:flex;align-items:center;overflow:hidden}
+.mw-logo-img{display:block;width:176px;max-width:100%;height:34px;object-fit:contain;object-position:left center}
+.sub-icon{width:18px;height:18px;display:grid;place-items:center;flex:0 0 18px;color:#8FA8B8;font-size:12px;font-weight:800}
+.nav-item.active .sub-icon{color:var(--teal2)}
+.app,.sidebar,.main,.suite-label,.nav-label,.nav-title,.suite-divider,.side-foot,.logo{transition:all .22s ease}
+body.sidebar-collapsed .app{grid-template-columns:64px minmax(0,1fr)}
+body.sidebar-collapsed .sidebar{transform:none;width:auto;min-width:64px;overflow-x:hidden;padding:48px 8px 14px;border-right:0}
+body.sidebar-collapsed .main{width:auto!important;max-width:none!important;min-width:0;margin-left:0!important}
+body.sidebar-collapsed .sidebar-toggle{left:42px}
+body.sidebar-collapsed .logo,body.sidebar-collapsed .nav-title,body.sidebar-collapsed .suite-divider,body.sidebar-collapsed .side-foot{opacity:0;height:0;margin:0;padding:0;overflow:hidden;border:0}
+body.sidebar-collapsed .suite-label,body.sidebar-collapsed .nav-label{display:none}
+body.sidebar-collapsed .suite-nav{margin-top:0}
+body.sidebar-collapsed .suite-item{justify-content:center;padding:10px 6px;margin:4px 0;gap:0}
+body.sidebar-collapsed .suite-icon{width:32px;height:32px;flex:0 0 32px;border-radius:8px;font-size:11px}
+body.sidebar-collapsed .subnav{margin:4px 0 10px;padding:0;border-left:0}
+body.sidebar-collapsed .subnav .nav-item{justify-content:center;padding:8px 6px;margin:3px 0;gap:0}
+body.sidebar-collapsed .subnav .sub-icon{width:30px;height:30px;flex:0 0 30px;border-radius:7px;background:#102B3F;color:#9FB4C1}
+body.sidebar-collapsed .subnav .nav-item.active .sub-icon{background:#17354A;color:var(--teal2)}
+body.sidebar-collapsed .nav-item:not([data-page]){justify-content:center;padding:8px 6px;font-size:0}
+body.sidebar-collapsed .nav-item:not([data-page]) .nav-dot{width:10px;height:10px}
+@media(max-width:760px){.sidebar-toggle{display:none}}
+
+
+/* v4 logo alignment override */
+.sidebar .brand, .sidebar .mw-logo, .suite-sidebar .brand, .suite-sidebar .mw-logo {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+}
+.sidebar .brand img, .sidebar .mw-logo img, .suite-sidebar .brand img, .suite-sidebar .mw-logo img {
+  max-width:180px !important;
+  width:72% !important;
+  height:auto !important;
+  display:block;
+  margin:0 auto !important;
+  object-fit:contain;
+}
+.sidebar.collapsed .brand img, .sidebar.collapsed .mw-logo img, .suite-sidebar.collapsed .brand img, .suite-sidebar.collapsed .mw-logo img {
+  max-width:34px !important;
+  width:34px !important;
+}
+
+
+/* v5 logo sizing based on actual 230px sidebar width (198px usable after padding) */
+.sidebar .logo{
+  width:100%;
+  height:56px;
+  margin:0 0 22px 0;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:visible;
+}
+.sidebar .mw-logo-img{
+  width:190px !important;
+  max-width:96% !important;
+  height:auto !important;
+  max-height:52px;
+  display:block;
+  margin:0 auto !important;
+  object-fit:contain;
+  object-position:center center;
+}
+body.sidebar-collapsed .sidebar .logo{
+  opacity:0;
+  height:0;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+}
+
+
+/* ===== Final teal shell ===== */
+:root{--sidebar-light:#F8FBFD;--sidebar-text:#16283A;--sidebar-muted:#70869A;--sidebar-line:#DCE6ED;--sidebar-active:#DFF8F6;--sidebar-active-text:#087A76;}
+body{background:#E0F2F1;}
+.app{background:transparent;}
+.sidebar{background:linear-gradient(180deg,rgba(255,255,255,.99),rgba(247,250,253,.99));color:var(--sidebar-text);border-right:1px solid rgba(188,205,217,.85);box-shadow:5px 0 24px rgba(34,71,95,.06);}
+.nav-title{color:#71869A;font-weight:800}.suite-item,.nav-item{color:#24384A}
+.suite-item:hover,.nav-item:hover{background:#EEF7F8;color:#0B4F5B}
+.suite-item.active,.nav-item.active{background:linear-gradient(90deg,#DDF8F5,#EAFBFB);color:#087A76;box-shadow:inset 0 0 0 1px rgba(19,199,192,.12)}
+.suite-icon{border-color:#91A9B9;color:#5D7688;background:#fff}.suite-item.active .suite-icon{border-color:#16BEB8;color:#078A84;background:#F5FFFE}
+.sub-icon{color:#657D8E}.nav-item.active .sub-icon{color:#078A84}.suite-divider{background:#DCE6ED}.sidebar::-webkit-scrollbar-thumb{background:#C5D3DD}
+.sidebar-toggle{border:1px solid #C7D7E1;background:#FFFFFF;color:#355368;box-shadow:0 2px 8px rgba(22,58,80,.10)}.sidebar-toggle:hover{background:#EEF8F8;color:#087A76}
+body.sidebar-collapsed .sidebar{background:rgba(250,252,254,.99);border-right:1px solid #DCE6ED}
+body.sidebar-collapsed .suite-icon{background:#fff;border-color:#C4D2DB;color:#5E7688}.main{position:relative;background:#E0F2F1!important;background-image:none!important;min-height:100vh}
+.topbar{background:rgba(255,255,255,.90);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);border-bottom:1px solid rgba(213,227,235,.9);box-shadow:0 3px 18px rgba(36,74,98,.05)}
+.content{background:transparent}.panel,.metric,.monitor-card{background:rgba(255,255,255,.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:rgba(210,226,235,.92);box-shadow:0 8px 24px rgba(31,68,92,.08)}
+.brand-btn,.filter-select,.secondary,.field input,.field select,.field textarea{background:rgba(255,255,255,.96)}
+.product-label{margin-bottom:8px}.workflow-nav{padding:11px 12px;border-radius:9px;color:#24384A;margin:3px 0;font-size:14px;font-weight:600;gap:11px}.workflow-nav:hover{background:#EEF7F8;color:#0B4F5B}.workflow-nav.active{background:linear-gradient(90deg,#DDF8F5,#EAFBFB);color:#087A76;font-weight:800}.workflow-nav .sub-icon{width:18px;height:18px;flex:0 0 18px;border:1.5px solid #91A9B9;border-radius:5px;display:grid;place-items:center;font-size:10px;color:#5D7688;background:#fff}.workflow-nav.active .sub-icon{border-color:#16BEB8;color:#078A84;background:#F5FFFE}
+body.sidebar-collapsed .workflow-nav{justify-content:center;padding:10px 6px;margin:4px 0;gap:0}body.sidebar-collapsed .workflow-nav .sub-icon{width:32px;height:32px;flex:0 0 32px;border-radius:8px;font-size:11px;background:#fff;color:#627B8D;border:1px solid #D4E0E7}body.sidebar-collapsed .workflow-nav.active .sub-icon{background:#E5F9F7;color:#087A76;border-color:#85DCD6}
+
+/* ===== Demo Mode ===== */
+.demo-mode-btn{border:1px solid #B8DDE4;background:rgba(255,255,255,.92);color:#0C6D73;border-radius:10px;padding:8px 11px;font-weight:800;font-size:12px;display:flex;align-items:center;gap:7px;box-shadow:0 3px 10px rgba(15,42,61,.06)}
+.demo-mode-btn:hover{background:#F0FBFA;border-color:#77CCC8}.demo-mode-btn.active{background:#0D777D;color:#fff;border-color:#0D777D}
+.demo-overlay{position:fixed;inset:0;z-index:8000;display:none;pointer-events:none}.demo-overlay.show{display:block}
+.demo-spotlight{position:fixed;z-index:8001;border:3px solid #13C7C0;border-radius:14px;box-shadow:0 0 0 9999px rgba(5,22,34,.50),0 0 0 7px rgba(19,199,192,.18),0 10px 30px rgba(5,22,34,.22);transition:all .38s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.demo-card{position:fixed;z-index:8010;width:min(390px,calc(100vw - 32px));background:rgba(255,255,255,.97);border:1px solid #D9E7ED;border-radius:16px;box-shadow:0 18px 55px rgba(5,22,34,.22);padding:16px;pointer-events:auto;transition:all .28s ease}
+.demo-card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.demo-eyebrow{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#0C8E8A}.demo-card h3{margin:4px 0 6px;font-size:18px;color:#102638}.demo-card p{margin:0;color:#5F7482;font-size:12.5px;line-height:1.55}.demo-step-count{font-size:10px;color:#7C909D;font-weight:800;white-space:nowrap;background:#F2F7F9;border-radius:999px;padding:5px 8px}
+.demo-controls{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:8020;display:flex;align-items:center;gap:7px;background:rgba(9,28,44,.95);border:1px solid rgba(255,255,255,.10);border-radius:999px;padding:7px 9px;box-shadow:0 14px 35px rgba(5,22,34,.28);pointer-events:auto}.demo-control{width:34px;height:34px;border:0;border-radius:50%;background:#17384D;color:#fff;display:grid;place-items:center;font-size:13px;font-weight:900}.demo-control:hover{background:#24516A}.demo-control.primary-demo{width:auto;padding:0 14px;border-radius:999px;background:#00AFA8}.demo-control.primary-demo:hover{background:#009791}.demo-progress{width:110px;height:4px;background:#315164;border-radius:99px;overflow:hidden;margin:0 5px}.demo-progress span{display:block;height:100%;background:#28D3CB;width:0%;transition:width .35s ease}.demo-exit{width:auto;padding:0 11px;border-radius:999px;color:#DDEAF0}
+body.demo-running .sidebar-toggle{opacity:.35;pointer-events:none}
+body.demo-intro .demo-spotlight{left:0!important;top:0!important;width:100vw!important;height:100vh!important;border:0!important;border-radius:0!important;box-shadow:0 0 0 9999px rgba(5,22,34,.68)!important;background:transparent}
+body.demo-intro .demo-card{left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(720px,calc(100vw - 40px));padding:26px 28px 24px;border-radius:22px;background:rgba(255,255,255,.985)}
+body.demo-intro .demo-card h3{font-size:27px;margin:5px 0 10px}body.demo-intro .demo-card p{font-size:14px;line-height:1.65;color:#526B79}body.demo-intro .demo-controls{display:none}
+.demo-intro-flow{display:none;margin:18px 0 0;grid-template-columns:repeat(6,1fr);gap:7px}.demo-intro-flow span{background:#EEF8F8;border:1px solid #CAE9E7;color:#087C78;border-radius:10px;padding:9px 6px;text-align:center;font-size:10px;font-weight:900}.demo-intro-sources{display:none;flex-wrap:wrap;gap:7px;margin-top:14px}.demo-intro-sources span{background:#F4F1FF;color:#6550C8;border-radius:999px;padding:6px 9px;font-size:10px;font-weight:800}.demo-intro-start{display:none;margin-top:20px;border:0;background:linear-gradient(135deg,#00B5AD,#078D91);color:#fff;border-radius:11px;padding:11px 18px;font-weight:900;box-shadow:0 7px 18px rgba(0,181,173,.22)}
+body.demo-intro .demo-intro-flow{display:grid}body.demo-intro .demo-intro-sources{display:flex}body.demo-intro .demo-intro-start{display:inline-flex;align-items:center;gap:7px}
+@media(max-width:760px){body.demo-intro .demo-card{width:calc(100vw - 28px)!important;padding:20px!important}.demo-intro-flow{grid-template-columns:repeat(3,1fr)}.demo-card{left:16px!important;right:16px!important;bottom:76px!important;top:auto!important;width:auto}.demo-controls{bottom:10px}.demo-progress{width:64px}}
+
+</style>
+</head>
+<body>
+<button id="sidebarToggle" class="sidebar-toggle" aria-label="Collapse sidebar" title="Collapse sidebar">‹</button>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo"><img src="" alt="Meltwater" class="mw-logo-img"></div>
+    <div class="nav-title">Meltwater Suite</div>
+    <div class="suite-nav">
+      <div class="suite-item active product-label"><span class="suite-icon">✦</span><span class="suite-label">Opportunity Radar</span></div>
+      <div class="nav-item workflow-nav active" data-page="radar"><span class="sub-icon">⌁</span><span class="nav-label">Radar</span></div>
+      <div class="nav-item workflow-nav" data-page="detail"><span class="sub-icon">◎</span><span class="nav-label">Opportunity Depth</span></div>
+      <div class="nav-item workflow-nav" data-page="plan"><span class="sub-icon">✓</span><span class="nav-label">Action Plan</span></div>
+      <div class="nav-item workflow-nav" data-page="monitor"><span class="sub-icon">↗</span><span class="nav-label">Activated Opportunities</span></div>
+      <div class="nav-item workflow-nav" data-page="engine"><span class="sub-icon">⚙</span><span class="nav-label">Engine Expansion</span></div>
+    </div>
+    <div class="suite-divider"></div>
+    <div class="nav-title">Connected Intelligence</div>
+    <div class="nav-item"><span class="nav-dot"></span>Media Intelligence</div>
+    <div class="nav-item"><span class="nav-dot"></span>Social Listening</div>
+    <div class="nav-item"><span class="nav-dot"></span>Creator Intelligence</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><div class="top-title">Meltwater Opportunity Radar</div><div class="top-sub" id="lastUpdated">Signals updated just now</div></div>
+      <div class="top-actions">
+        <button class="demo-mode-btn" id="demoModeBtn" title="Start guided demo"><span>▶</span><span>Demo Mode</span></button>
+        <div class="live"><span class="pulse"></span>LIVE DEMO</div>
+        <div class="brand-wrap">
+          <button class="brand-btn" id="brandBtn"><div class="brand-avatar has-logo" id="brandAvatar"></div><div class="brand-meta"><b id="brandName">Nike</b><span id="brandIndustry">Apparel & Sportswear</span></div><span class="caret">⌄</span></button>
+          <div class="brand-menu" id="brandMenu"><div id="brandOptions"></div><button class="add-brand" id="addBrandBtn">＋ Add new brand</button></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="page active" id="page-radar">
+        <div class="hero"><div><h1>Radar</h1><p>Detect where <b id="heroBrand">Nike</b> can win next by connecting media, social, creator, competitive and AI visibility signals.</p><div class="filter-summary" id="filterSummary">Showing all live opportunities</div></div><div class="filters"><div class="filter-control"><label for="typeFilter">Opportunity type</label><select class="filter-select" id="typeFilter"><option value="All Opportunities">All Opportunities</option><option value="Emerging Demand">Emerging Demand</option><option value="Competitor Weakness">Competitor Weakness</option><option value="Creator Opportunity">Creator Opportunity</option><option value="PR Opportunity">PR Opportunity</option><option value="Content Whitespace">Content Whitespace</option></select></div><div class="filter-control"><label for="timeFilter">Timeframe</label><select class="filter-select" id="timeFilter"><option value="live">Live</option><option value="7d">Last 7 days</option><option value="30d">Last 30 days</option></select></div></div></div>
+        <div class="metrics">
+          <div class="metric"><div class="metric-top"><span>Signals monitored</span><span>24h</span></div><div class="metric-value" id="mSignals">18.4K</div><div class="delta" id="dSignals">↑ 12.8%</div></div>
+          <div class="metric"><div class="metric-top"><span>Open opportunities</span><span>Now</span></div><div class="metric-value" id="mOpps">7</div><div class="delta">3 high priority</div></div>
+          <div class="metric"><div class="metric-top"><span>Avg. opportunity score</span><span>/100</span></div><div class="metric-value" id="mScore">82</div><div class="delta">↑ 5 points</div></div>
+          <div class="metric"><div class="metric-top"><span>Opportunity window</span><span>Median</span></div><div class="metric-value" id="mWindow">5.2d</div><div class="delta down">Act within 48h</div></div>
+        </div>
+        <div class="layout">
+          <div class="panel"><div class="panel-head"><h3>Prioritized opportunities</h3><span>Ranked by commercial potential × urgency × brand fit</span></div><div class="opp-list" id="oppList"></div></div>
+          <div class="panel"><div class="panel-head"><h3>Live signal pulse</h3><span id="pulseLabel">Last 12 intervals</span></div><div class="insight"><h4 id="pulseTitle">Demand is accelerating</h4><p id="pulseText">Cross-channel conversation is rising faster than useful brand coverage, creating a short action window.</p><div class="radar-box" id="pulseBars"></div><div class="kv"><div><small>Media velocity</small><b id="mediaVelocity">+41%</b></div><div><small>Social demand</small><b id="socialDemand">+63%</b></div><div><small>Creator momentum</small><b id="creatorMomentum">+28%</b></div><div><small>AI visibility gap</small><b id="aiGap">17 pts</b></div></div><button class="primary full" id="inspectTop">Inspect top opportunity →</button></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-detail">
+        <div class="hero"><div><h1 id="detailTitle">Opportunity detail</h1><p id="detailDesc"></p></div><button class="secondary" id="backRadar">← Back to Radar</button></div>
+        <div class="stepper"><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div></div>
+        <div class="detail-grid">
+          <div class="panel"><div class="section"><h3>Why this is an opportunity</h3><div id="reasons"></div><h3 style="margin-top:20px">Recommended play</h3><div class="reason"><div class="reason-icon">→</div><div><b id="recommendedPlay"></b><p id="recommendedText"></p></div></div><button class="primary" id="createPlan">Create action plan →</button></div></div>
+          <div class="panel"><div class="section"><h3>Opportunity score</h3><div style="font-size:54px;font-weight:800;color:var(--green)" id="detailScore">91</div><div class="kv"><div><small>Urgency</small><b id="urgency">High</b></div><div><small>Brand fit</small><b id="fit">94%</b></div><div><small>Potential reach</small><b id="reach">12.8M</b></div><div><small>Window</small><b id="window">36 hours</b></div></div><h3 style="margin-top:20px">Evidence sources</h3><div class="signals" id="evidence"></div><div class="feedback-wrap"><button class="feedback-trigger" id="feedbackTrigger" title="Flag this opportunity" aria-label="Flag this opportunity">&#9873;</button><div class="feedback-panel" id="feedbackPanel"><div class="feedback-head"><div><h4>Flag this opportunity</h4><p>Choose one quick outcome. Your selection is saved as a human training signal for Opportunity Radar.</p></div><button class="secondary" id="closeFeedback" style="padding:6px 9px">&times;</button></div><div class="quick-feedback" id="quickFeedback"><button class="quick-feedback-btn accept" data-feedback="Accept"><b>&#10003; Accept</b><span>Relevant opportunity</span></button><button class="quick-feedback-btn refine" data-feedback="Refine"><b>&#9998; Refine</b><span>Change assumptions / context</span></button><button class="quick-feedback-btn snooze" data-feedback="Snooze"><b>&#9202; Snooze</b><span>Right idea, wrong timing</span></button><button class="quick-feedback-btn dismiss" data-feedback="Dismiss"><b>&times; Dismiss</b><span>Not relevant / weak evidence</span></button></div><div class="feedback-status" id="feedbackStatus">Feedback captured for training</div></div></div></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-plan">
+        <div class="hero"><div><h1>Create Action Plan</h1><p>Turn the selected opportunity into an executable workflow with ownership, channels, milestones and measurable KPIs.</p></div><button class="secondary" id="backDetail">← Back</button></div>
+        <div class="stepper"><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div></div>
+        <div class="detail-grid">
+          <div class="panel"><div class="section"><h3>Activation setup</h3><div class="plan-grid"><div class="field"><label>Plan name</label><input id="planName"></div><div class="field"><label>Owner</label><select id="planOwner"><option>Brand Communications</option><option>Social Team</option><option>PR & Media Relations</option><option>Creator Marketing</option><option>Growth Marketing</option></select></div><div class="field"><label>Start</label><input id="planStart" type="date"></div><div class="field"><label>Target completion</label><input id="planEnd" type="date"></div></div><div class="field" style="margin-top:14px"><label>Primary objective</label><textarea id="planObjective"></textarea></div></div></div>
+          <div class="panel"><div class="section"><h3>Recommended actions</h3><div id="recommendedActions"></div><div class="field" style="margin-top:12px"><label>Primary KPI</label><select id="planKpi"><option>Share of voice uplift</option><option>Positive sentiment uplift</option><option>Qualified engagement</option><option>AI recommendation share</option><option>Earned media reach</option></select></div><button class="primary full" style="margin-top:14px" id="activatePlan">Create & Activate Plan →</button></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-monitor">
+        <div class="hero"><div><h1>Activated Opportunities</h1><p>Monitor execution, signal movement and business impact after Opportunity Radar recommendations are activated.</p></div><button class="secondary" id="newScan">← Return to Radar</button></div>
+        <div class="stepper"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div></div>
+        <div class="monitor-grid"><div class="monitor-card"><small>Active plans</small><strong id="activePlans">0</strong><span class="delta">Live monitoring</span></div><div class="monitor-card"><small>Avg. execution progress</small><strong id="avgProgress">0%</strong><span class="delta">Across activated opportunities</span></div><div class="monitor-card"><small>Measured impact</small><strong id="impactValue">+0%</strong><span class="delta">vs. activation baseline</span></div></div>
+        <div class="panel"><div class="panel-head"><h3>Opportunity activation monitor</h3><span>Signals refresh every 5 seconds in this demo</span></div><div class="section"><div class="activation-list" id="activationList"><div class="empty">No activated opportunities yet. Create an action plan to start monitoring.</div></div></div></div>
+      </section>
+
+      <section class="page" id="page-engine">
+        <div class="engine-hero"><h1>Opportunity Radar Engine Expansion</h1><p>Conceptual expansion of the Opportunity Radar engine: combine GenAI visibility signals and Competitive Intelligence with existing media, social and creator signals to identify not only what is happening, but where a brand can act next.</p></div>
+        <div class="engine-flow">
+          <div class="engine-node"><h3>GenAI Intelligence</h3><p>Adds an AI-discovery layer: where brands are mentioned, recommended, omitted or misrepresented across generative-AI answers.</p><div class="source-pills"><span class="source-pill">AI visibility</span><span class="source-pill">Prompt demand</span><span class="source-pill">Recommendation share</span><span class="source-pill">Citation gaps</span></div></div>
+          <div class="engine-arrow">→</div>
+          <div class="engine-node core"><h3>Opportunity Radar Engine</h3><p>Normalizes cross-channel evidence, detects gaps and momentum, scores commercial potential × urgency × brand fit, and turns the strongest signals into recommended plays.</p><div class="source-pills"><span class="source-pill">Signal fusion</span><span class="source-pill">Opportunity scoring</span><span class="source-pill">Human feedback loop</span><span class="source-pill">Action recommendations</span></div></div>
+          <div class="engine-arrow">←</div>
+          <div class="engine-node"><h3>Competitive Intelligence</h3><p>Adds the market-movement layer: competitor launches, positioning changes, campaign momentum, share-of-voice shifts and emerging weaknesses that reveal where a brand can differentiate or act first.</p><div class="source-pills"><span class="source-pill">Competitor moves</span><span class="source-pill">Share of voice</span><span class="source-pill">Positioning gaps</span><span class="source-pill">Campaign momentum</span></div></div>
+        </div>
+        <div class="engine-grid">
+          <div class="engine-card"><small>What GenAI adds</small><h3>AI visibility opportunities</h3><p>Surface prompts and answer spaces where a competitor is recommended more often, where the brand is absent, or where third-party source coverage can improve discoverability.</p><ul class="engine-list"><li>AI recommendation whitespace</li><li>Competitor answer dominance</li><li>Missing or weak cited-source coverage</li><li>Prompt clusters with commercial intent</li></ul></div>
+          <div class="engine-card"><small>What Competitive Intelligence adds</small><h3>Competitive & whitespace opportunities</h3><p>Track competitor momentum, positioning and market gaps, then connect those shifts to media, social, creator and AI evidence to identify where the brand can differentiate and respond.</p><ul class="engine-list"><li>Competitor campaign and launch momentum</li><li>Share-of-voice gains and losses</li><li>Positioning and message whitespace</li><li>Competitor weaknesses and response windows</li></ul></div>
+          <div class="engine-card"><small>Resulting engine</small><h3>One opportunity layer</h3><p>The combined engine can rank opportunities using a broader evidence base and keep learning from outcomes and human review before recommendations are activated.</p><ul class="engine-list"><li>Richer opportunity confidence</li><li>More precise brand-fit scoring</li><li>New AI + competitive opportunity types</li><li>Feedback-informed model improvement</li></ul></div>
+        </div>
+        <div class="panel" style="margin-top:16px"><div class="panel-head"><h3>Expanded signal-to-action loop</h3><span>Prototype concept</span></div><div class="section"><div class="reason"><div class="reason-icon">1</div><div><b>Ingest</b><p>Media, social, creator, GenAI and competitive signals are normalized into a shared evidence layer.</p></div></div><div class="reason"><div class="reason-icon">2</div><div><b>Detect & score</b><p>The engine identifies demand gaps, competitor weakness, creator momentum, PR openings, content whitespace and AI/competitive opportunities.</p></div></div><div class="reason"><div class="reason-icon">3</div><div><b>Explain & activate</b><p>Opportunity Depth explains why the signal matters, Action Plan converts it into execution, and Activated Opportunities monitors impact.</p></div></div><div class="reason"><div class="reason-icon">4</div><div><b>Learn</b><p>Human feedback and observed activation outcomes become training signals for future ranking and recommendation quality.</p></div></div></div></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal-back" id="brandModal"><div class="modal"><h3>Add a brand</h3><p>Create a new brand workspace. The prototype will generate a demo opportunity profile automatically.</p><div class="field"><label>Brand name</label><input id="newBrandName" placeholder="e.g. Patagonia"></div><div class="field" style="margin-top:10px"><label>Industry</label><input id="newBrandIndustry" placeholder="e.g. Outdoor & Apparel"></div><div class="modal-actions"><button class="secondary" id="cancelBrand">Cancel</button><button class="primary" id="saveBrand">Add brand</button></div></div></div>
+<div class="toast" id="toast">Action completed</div>
+
+
+  <div class="demo-overlay" id="demoOverlay" aria-hidden="true">
+    <div class="demo-spotlight" id="demoSpotlight"></div>
+    <div class="demo-card" id="demoCard">
+      <div class="demo-card-top">
+        <div><div class="demo-eyebrow" id="demoEyebrow">Guided demo</div><h3 id="demoTitle">Opportunity Radar</h3></div>
+        <div class="demo-step-count" id="demoStepCount">1 / 11</div>
+      </div>
+      <p id="demoText"></p>
+      <div class="demo-intro-sources"><span>Media Intelligence</span><span>Social Listening</span><span>Creator Intelligence</span><span>Competitive Intelligence</span><span>GenAI Lens</span></div>
+      <div class="demo-intro-flow"><span>Detect</span><span>Prioritize</span><span>Explain</span><span>Act</span><span>Monitor</span><span>Learn</span></div>
+      <button class="demo-intro-start" id="demoIntroStart"><span>▶</span><span>Start Demo</span></button>
+    </div>
+    <div class="demo-controls" id="demoControls">
+      <button class="demo-control" id="demoPrev" title="Previous step">‹</button>
+      <button class="demo-control primary-demo" id="demoPlayPause" title="Pause demo">Ⅱ Pause</button>
+      <button class="demo-control" id="demoNext" title="Next step">›</button>
+      <div class="demo-progress"><span id="demoProgressBar"></span></div>
+      <button class="demo-control" id="demoRestart" title="Restart demo">↻</button>
+      <button class="demo-control demo-exit" id="demoExit" title="Exit demo">Exit</button>
+    </div>
+  </div>
+<script>
+const brandData = [
+ {id:'nike',name:'Nike',industry:'Apparel & Sportswear',logo:'',metrics:{signals:18.4,opps:7,score:82,window:5.2,media:41,social:63,creator:28,ai:17},
+  opps:[
+   {title:'Women’s performance running surge',type:'Emerging Demand',score:93,desc:'Search, social and creator signals show fast-rising interest in women’s performance running and recovery.',signals:['Social +68%','Creators +42%','News +31%'],reasons:['Demand is rising 2.1× faster than category coverage','Competitor messaging is concentrated on lifestyle rather than performance','High-authority creators are increasing discussion of recovery and fit'],play:'Own the performance + recovery narrative',text:'Launch a creator-backed earned media package that answers the fastest-growing questions around performance, fit and recovery.',urgency:'High',fit:'96%',reach:'14.2M',window:'36 hours',evidence:['Media Intelligence','Social Listening','Creator Intelligence','GenAI Lens']},
+   {title:'Competitor sustainability message fatigue',type:'Competitor Weakness',score:86,desc:'Competitor sustainability coverage is increasing, but audience engagement and positive sentiment are flattening.',signals:['Sentiment -11%','Engagement -8%','Whitespace +24%'],reasons:['Audience response to generic sustainability claims is weakening','Material innovation content is outperforming broad ESG messaging','AI answers cite product-level proof more often than corporate claims'],play:'Shift sustainability into product proof',text:'Prioritize measurable product innovation stories and creator explainers over generic corporate sustainability claims.',urgency:'Medium',fit:'90%',reach:'8.6M',window:'4 days',evidence:['Media Intelligence','Social Listening','GenAI Lens']},
+   {title:'Creator momentum around hybrid training',type:'Creator Opportunity',score:81,desc:'Mid-tier fitness creators are accelerating discussion around hybrid running + strength programs.',signals:['Creators +57%','Engagement +36%'],reasons:['Creator momentum is ahead of mainstream coverage','Mid-tier creators show stronger conversion intent','Topic aligns with training product portfolio'],play:'Activate a hybrid-training creator cohort',text:'Engage a focused creator set with a challenge format and product proof points.',urgency:'Medium',fit:'88%',reach:'6.9M',window:'6 days',evidence:['Creator Intelligence','Social Listening']}
+  ]},
+ {id:'tesla',name:'Tesla',industry:'Automotive & EV',logo:'',metrics:{signals:24.7,opps:9,score:85,window:3.9,media:52,social:47,creator:19,ai:21},opps:[
+   {title:'EV charging reliability conversation spike',type:'Emerging Demand',score:95,desc:'Consumer discussion on charging reliability and route confidence is accelerating across media and social channels.',signals:['Social +74%','News +46%','Questions +61%'],reasons:['Charging reliability questions are rising faster than useful coverage','Competitor coverage focuses more on range than real-world charging experience','High-intent users are asking route-planning questions'],play:'Lead with proof of charging confidence',text:'Publish route-level evidence, reliability benchmarks and expert commentary while the question gap is open.',urgency:'High',fit:'94%',reach:'18.7M',window:'24 hours',evidence:['Media Intelligence','Social Listening','Competitive Intelligence','GenAI Lens']},
+   {title:'Legacy automaker software complaints',type:'Competitor Weakness',score:88,desc:'Software and infotainment complaints are rising for several legacy EV competitors.',signals:['Complaints +39%','Competitor sentiment -14%'],reasons:['Competitor software issues are producing negative conversation','Software experience is increasingly part of purchase consideration','AI comparisons frequently mention usability and updates'],play:'Reframe EV value around software experience',text:'Use owner stories and product demonstrations to emphasize software consistency and update velocity.',urgency:'High',fit:'92%',reach:'11.3M',window:'2 days',evidence:['Social Listening','Media Intelligence','GenAI Lens']},
+   {title:'Fleet electrification procurement gap',type:'Content Whitespace',score:83,desc:'B2B fleet electrification questions are growing while accessible comparison content remains limited.',signals:['B2B mentions +33%','Coverage gap 29%'],reasons:['Fleet decision-makers need TCO and charging guidance','Coverage is highly fragmented','Competitors have limited executive thought leadership'],play:'Own the fleet economics conversation',text:'Package TCO, infrastructure and operational proof into executive-ready content.',urgency:'Medium',fit:'86%',reach:'4.8M',window:'7 days',evidence:['Media Intelligence','Social Listening']}
+  ]},
+ {id:'netflix',name:'Netflix',industry:'Streaming & Entertainment',logo:'',metrics:{signals:31.2,opps:8,score:84,window:2.8,media:34,social:71,creator:44,ai:14},opps:[
+   {title:'Short-form fandom around new releases',type:'Creator Opportunity',score:94,desc:'Creator-led clips, reactions and theories are accelerating ahead of traditional entertainment coverage.',signals:['Creators +82%','Social +76%','News +22%'],reasons:['Creator conversation is moving 3× faster than entertainment press','Fan theory content produces above-average shares','Multiple titles show overlapping audience clusters'],play:'Turn fan theories into an amplification loop',text:'Seed creator prompts, cast reaction formats and official social assets tied to the fastest-rising fan theories.',urgency:'High',fit:'97%',reach:'24.9M',window:'18 hours',evidence:['Creator Intelligence','Social Listening','Media Intelligence']},
+   {title:'Competitor password policy backlash',type:'Competitor Weakness',score:87,desc:'A competitor policy change is generating negative sentiment and cancellation discussion.',signals:['Competitor sentiment -23%','Switching intent +18%'],reasons:['Negative conversation has reached mainstream tech coverage','Users are comparing platform value and household flexibility','Recommendation threads are increasing'],play:'Capture switching consideration',text:'Emphasize value, discovery and household usage through owned and creator channels without directly attacking competitors.',urgency:'High',fit:'89%',reach:'15.1M',window:'48 hours',evidence:['Social Listening','Media Intelligence']},
+   {title:'Local-language thriller demand',type:'Emerging Demand',score:80,desc:'Cross-market demand for local-language thrillers is rising with limited recommendation coverage.',signals:['Search proxy +41%','AI queries +28%'],reasons:['Audience interest is expanding outside origin markets','AI discovery questions are rising','Editorial recommendation coverage is fragmented'],play:'Create a cross-market discovery push',text:'Bundle local-language titles into thematic discovery stories and recommendation prompts.',urgency:'Medium',fit:'91%',reach:'8.2M',window:'5 days',evidence:['GenAI Lens','Social Listening','Media Intelligence']}
+  ]},
+ {id:'microsoft',name:'Microsoft',industry:'Technology & Enterprise AI',logo:'',metrics:{signals:27.9,opps:10,score:87,window:4.1,media:58,social:39,creator:25,ai:26},opps:[
+   {title:'AI agent governance demand',type:'Emerging Demand',score:96,desc:'Enterprise discussion is shifting from AI experimentation toward agent governance, security and measurable productivity.',signals:['News +64%','AI queries +72%','B2B social +39%'],reasons:['Governance questions are rising faster than vendor explainers','Security and compliance now dominate enterprise AI evaluation','Competitor content remains product-led rather than workflow-led'],play:'Own the enterprise agent governance framework',text:'Publish an executive framework connecting governance, security, workflow design and measurable productivity outcomes.',urgency:'High',fit:'98%',reach:'9.7M',window:'30 hours',evidence:['Media Intelligence','Social Listening','GenAI Lens']},
+   {title:'Competitor AI pricing confusion',type:'Competitor Weakness',score:89,desc:'Discussion around AI pricing complexity and usage uncertainty is increasing for competing platforms.',signals:['Pricing questions +48%','Negative sentiment +17%'],reasons:['Buyers are asking for predictable value models','Analyst commentary highlights cost-control risk','AI summaries increasingly mention pricing complexity'],play:'Lead with value predictability',text:'Frame platform value through scenario-based cost and productivity outcomes.',urgency:'High',fit:'92%',reach:'6.4M',window:'3 days',evidence:['Media Intelligence','GenAI Lens','Social Listening']},
+   {title:'Developer workflow creator gap',type:'Content Whitespace',score:84,desc:'Developer creators discuss AI coding heavily, but enterprise workflow proof is underrepresented.',signals:['Creator +36%','Coverage gap 31%'],reasons:['Hands-on workflow videos outperform launch content','Enterprise developers seek implementation detail','Creator content is concentrated on consumer tooling'],play:'Activate technical creators with real workflows',text:'Commission workflow-first technical demos across developer communities.',urgency:'Medium',fit:'90%',reach:'5.5M',window:'6 days',evidence:['Creator Intelligence','Social Listening']}
+  ]},
+ {id:'cocacola',name:'Coca-Cola',industry:'Beverage & FMCG',logo:'',metrics:{signals:15.8,opps:6,score:79,window:6.3,media:27,social:54,creator:61,ai:12},opps:[
+   {title:'Zero-sugar flavor experimentation',type:'Emerging Demand',score:91,desc:'Social and creator activity shows accelerating demand for zero-sugar flavor experimentation and limited-edition combinations.',signals:['Creators +69%','Social +58%','Purchase intent +21%'],reasons:['Flavor experimentation is rising among younger audiences','Creator recipes are outperforming traditional product posts','Competitor launches are fragmented across markets'],play:'Turn flavor experimentation into a participation mechanic',text:'Launch a creator-led flavor remix program supported by limited-edition content and audience voting.',urgency:'High',fit:'95%',reach:'16.8M',window:'2 days',evidence:['Creator Intelligence','Social Listening','Competitive Intelligence']},
+   {title:'Competitor packaging criticism',type:'Competitor Weakness',score:82,desc:'Packaging changes at a competitor are generating criticism around convenience and sustainability claims.',signals:['Negative sentiment +19%','Media +26%'],reasons:['Consumer complaints are moving into earned media','Discussion mixes usability with sustainability expectations','Category conversation lacks clear proof points'],play:'Reinforce packaging proof and usability',text:'Use transparent product and packaging evidence in owned and earned storytelling.',urgency:'Medium',fit:'86%',reach:'7.1M',window:'5 days',evidence:['Media Intelligence','Social Listening']},
+   {title:'Food-pairing creator whitespace',type:'Creator Opportunity',score:78,desc:'Food creators are generating high engagement around pairings, while beverage brand participation remains low.',signals:['Creator engagement +44%','Brand participation low'],reasons:['Pairing content has strong save/share rates','Category brands rarely participate contextually','Opportunity spans multiple meal occasions'],play:'Build an always-on pairing creator series',text:'Activate creators around food moments rather than product-only content.',urgency:'Medium',fit:'88%',reach:'9.4M',window:'8 days',evidence:['Creator Intelligence','Social Listening']}
+  ]}
+ ,{id:'boeing',name:'Boeing',industry:'Aerospace & Aviation',logo:'',metrics:{signals:17.4,opps:6,score:83,window:5.8,media:63,social:39,creator:18,ai:28},opps:[
+   {title:'Commercial aviation confidence rebound',type:'Emerging Demand',score:89,desc:'Media and industry discussion shows renewed interest in fleet modernization, delivery reliability and next-generation aircraft efficiency.',signals:['Media +46%','Industry demand +31%','AI queries +24%'],reasons:['Airline capacity planning is accelerating across major markets','Fleet efficiency is increasingly central to procurement narratives','High-intent discussion is shifting from recovery to modernization'],play:'Own the fleet-modernization narrative',text:'Package proof points around reliability, efficiency and long-term fleet economics for airline, media and analyst audiences.',urgency:'High',fit:'93%',reach:'8.9M',window:'3 days',evidence:['Media Intelligence','Competitive Intelligence','GenAI Lens']},
+   {title:'Competitor delivery-delay pressure',type:'Competitor Weakness',score:87,desc:'A competitor is facing elevated coverage around delivery timing and supply-chain constraints, creating a short-term positioning opening.',signals:['Competitor negatives +38%','Coverage gap +29%'],reasons:['Delivery reliability is becoming a differentiating procurement issue','Competitor scrutiny is concentrated in high-value trade media','Boeing can respond with factual operational proof points'],play:'Activate a reliability proof-point campaign',text:'Use verified delivery, services and operational evidence to reinforce confidence without directly attacking competitors.',urgency:'High',fit:'90%',reach:'6.4M',window:'48 hours',evidence:['Competitive Intelligence','Media Intelligence']},
+   {title:'Aviation creator and expert explainers',type:'Creator Opportunity',score:76,desc:'Aviation creators and technical experts are driving high engagement with explainers about aircraft technology, efficiency and safety systems.',signals:['Expert engagement +41%','Video views +35%'],reasons:['Technical explainers are outperforming generic corporate content','Credible expert voices increase trust in complex topics','Brand participation in educational creator formats remains limited'],play:'Build an expert aviation explainer series',text:'Partner with credible aviation creators and engineers to explain technology, operations and efficiency in accessible formats.',urgency:'Medium',fit:'85%',reach:'4.7M',window:'9 days',evidence:['Creator Intelligence','Social Listening']},
+   {title:'Sustainable aviation technology whitespace',type:'Content Whitespace',score:84,desc:'Search, media and AI answers show fragmented explanations of how aircraft design, fuels and operations combine to reduce aviation emissions.',signals:['Search demand +33%','AI visibility gap 21 pts','Coverage fragmentation'],reasons:['Audience questions are growing faster than authoritative explanations','Competitor content focuses on isolated technology claims','Boeing has multiple proof points that can be connected into one narrative'],play:'Create a sustainability technology hub',text:'Publish a connected explainer covering aircraft efficiency, sustainable aviation fuel compatibility and operational improvements.',urgency:'Medium',fit:'92%',reach:'7.6M',window:'12 days',evidence:['GenAI Lens','Media Intelligence','Competitive Intelligence']},
+   {title:'Manufacturing and engineering talent narrative',type:'PR Opportunity',score:81,desc:'Workforce, advanced manufacturing and engineering-skills coverage is rising, creating an earned-media opportunity around aerospace innovation.',signals:['Journalist interest +27%','Talent discussion +22%'],reasons:['Advanced manufacturing is becoming a broader business story','Engineering talent is linked to national competitiveness and innovation','Strong spokesperson and facility proof points can support coverage'],play:'Launch an engineering innovation media package',text:'Offer journalists access to engineers, facilities and data-led stories about aerospace manufacturing and workforce development.',urgency:'Medium',fit:'88%',reach:'5.5M',window:'6 days',evidence:['Media Intelligence','Social Listening']},
+   {title:'AI answer visibility on aircraft safety',type:'Content Whitespace',score:79,desc:'Generative AI answers about commercial aircraft safety rely heavily on third-party sources, with limited direct Boeing-owned evidence surfacing.',signals:['AI citation share 14%','Third-party dependency high'],reasons:['High-stakes questions are frequently answered through external sources','Owned technical materials are not consistently cited by AI systems','Improved source structure could increase authoritative visibility'],play:'Optimize authoritative safety source content',text:'Structure technical safety pages, FAQs and evidence-rich explainers for clearer retrieval and citation by AI systems.',urgency:'Medium',fit:'91%',reach:'3.9M',window:'14 days',evidence:['GenAI Lens','Media Intelligence']}
+  ]}
+
+];
+
+let brands=[...brandData]; let currentBrand=brands[0]; let selectedOpp=currentBrand.opps[0]; let activated=[]; let tick=0; let opportunityFilter='All Opportunities'; let timeframe='live';
+const $=id=>document.getElementById(id);
+function initials(name){return name.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()}
+function fmtK(v){return v.toFixed(1)+'K'}
+function showToast(msg){$('toast').textContent=msg;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
+
+function enrichPrototypeData(){
+ brands.forEach((b,bi)=>{
+   b.opps.forEach((o,oi)=>{o.baseScore=o.baseScore||o.score;o.ageDays=o.ageDays??((oi*3+bi)%24);});
+   if(!b.opps.some(o=>o.type==='PR Opportunity')){
+     const seed=b.opps[0];
+     b.opps.push({title:`Earned-media opening around ${b.industry.toLowerCase()} demand`,type:'PR Opportunity',score:80+((bi*3)%9),baseScore:80+((bi*3)%9),ageDays:bi%5,desc:`News and audience signals suggest a timely earned-media angle for ${b.name} before category coverage becomes saturated.`,signals:['Coverage gap +31%','Journalist interest rising','Audience demand +27%'],reasons:['Audience questions are rising faster than useful earned coverage','Relevant journalists are increasing coverage of adjacent themes','The brand has a credible proof point that can enter the conversation now'],play:'Launch a rapid-response PR story package',text:'Package a concise point of view, supporting evidence and spokesperson angle for priority media while the coverage gap remains open.',urgency:'High',fit:'91%',reach:'6.8M',window:'48 hours',evidence:['Media Intelligence','Social Listening']});
+   }
+ });
+}
+enrichPrototypeData();
+function brandMark(b){
+  if(b && b.logo){
+    return `<img src="${b.logo}" alt="${b.name} logo" style="width:100%;height:100%;object-fit:contain;display:block;border-radius:8px;" />`;
+  }
+  const name=(b && b.name)||'?';
+  const parts=name.trim().split(/\s+/).filter(Boolean);
+  const initials=(parts.length>1 ? parts[0][0]+parts[parts.length-1][0] : name.slice(0,2)).toUpperCase();
+  return `<span>${initials}</span>`;
+}
+function renderBrandMenu(){ $('brandOptions').innerHTML=brands.map(b=>`<div class="brand-option ${b.id===currentBrand.id?'active':''}" data-brand="${b.id}"><div class="brand-avatar ${b.logo?'has-logo':''}">${brandMark(b)}</div><div class="info"><b>${b.name}</b><small>${b.industry}</small></div>${b.id===currentBrand.id?'✓':''}</div>`).join(''); document.querySelectorAll('[data-brand]').forEach(el=>el.onclick=()=>selectBrand(el.dataset.brand)); }
+function selectBrand(id){currentBrand=brands.find(b=>b.id===id);const match=currentBrand.opps.find(o=>opportunityFilter==='All Opportunities'||o.type===opportunityFilter);selectedOpp=match||currentBrand.opps[0];$('brandMenu').classList.remove('show');renderAll();showPage('radar');}
+function timeframeScale(){return timeframe==='live'?1:timeframe==='7d'?1.18:1.42}
+function filteredOpportunities(){
+ return currentBrand.opps.map((o,i)=>({o,i})).filter(x=>opportunityFilter==='All Opportunities'||x.o.type===opportunityFilter);
+}
+function renderAll(){
+ $('brandName').textContent=currentBrand.name;$('brandIndustry').textContent=currentBrand.industry;$('brandAvatar').className='brand-avatar'+(currentBrand.logo?' has-logo':'');$('brandAvatar').innerHTML=brandMark(currentBrand);$('heroBrand').textContent=currentBrand.name;
+ const m=currentBrand.metrics, scale=timeframeScale(), list=filteredOpportunities();
+ $('mSignals').textContent=fmtK(m.signals*scale);$('mOpps').textContent=list.length;$('mScore').textContent=list.length?Math.round(list.reduce((s,x)=>s+(x.o.baseScore||x.o.score),0)/list.length):'—';$('mWindow').textContent=(m.window*(timeframe==='30d'?1.35:timeframe==='7d'?1.12:1)).toFixed(1)+'d';$('dSignals').textContent='↑ '+Math.max(4,Math.round(m.social/5*(timeframe==='live'?1:timeframe==='7d'?1.12:1.25)))+'%';
+ $('mediaVelocity').textContent='+'+Math.round(m.media*scale)+'%';$('socialDemand').textContent='+'+Math.round(m.social*scale)+'%';$('creatorMomentum').textContent='+'+Math.round(m.creator*scale)+'%';$('aiGap').textContent=Math.round(m.ai*(timeframe==='30d'?1.12:1))+' pts';
+ const tfLabel=timeframe==='live'?'Live':timeframe==='7d'?'Last 7 days':'Last 30 days';
+ $('filterSummary').textContent=`Showing ${opportunityFilter==='All Opportunities'?'all':opportunityFilter} opportunities · ${tfLabel} · ${list.length} result${list.length===1?'':'s'}`;
+ $('oppList').innerHTML=list.length?list.map(({o,i})=>`<div class="opp-card ${o===selectedOpp?'selected':''}" data-opp="${i}"><div><div class="opp-title">${o.title}<span class="type">${o.type}</span></div><div class="opp-desc">${o.desc}</div><div class="signals">${o.signals.map(s=>`<span class="signal">${s}</span>`).join('')}</div></div><div class="score"><div class="score-num ${(o.baseScore||o.score)>=88?'score-high':'score-med'}">${Math.max(60,Math.min(99,Math.round((o.baseScore||o.score)+(timeframe==='live'?0:timeframe==='7d'?1:2))))}</div><div class="score-label">OPPORTUNITY<br>SCORE</div></div></div>`).join(''):'<div class="empty">No opportunities match this type and timeframe. Choose a different filter to continue.</div>';
+ document.querySelectorAll('[data-opp]').forEach(el=>el.onclick=()=>{selectedOpp=currentBrand.opps[+el.dataset.opp];renderAll();renderDetail();showPage('detail')});
+ renderBars(); renderBrandMenu(); renderDetail();
+}
+function renderBars(){const base=currentBrand.metrics.social;let vals=Array.from({length:12},(_,i)=>Math.max(15,Math.min(96,22+i*3+base*.35+Math.sin((i+tick)/2)*10)));$('pulseBars').innerHTML=vals.map(v=>`<div class="bar" style="height:${v}%"></div>`).join('')}
+function renderDetail(){const o=selectedOpp;$('detailTitle').textContent=o.title;$('detailDesc').textContent=o.desc;$('detailScore').textContent=o.score;$('urgency').textContent=o.urgency;$('fit').textContent=o.fit;$('reach').textContent=o.reach;$('window').textContent=o.window;$('recommendedPlay').textContent=o.play;$('recommendedText').textContent=o.text;$('evidence').innerHTML=o.evidence.map(x=>`<span class="signal">${x}</span>`).join('');$('reasons').innerHTML=o.reasons.map((r,i)=>`<div class="reason"><div class="reason-icon">${i+1}</div><div><b>${r}</b><p>${['Cross-channel evidence indicates this signal is material and actionable.','The current pattern creates a differentiated opening for the brand.','Timing and brand fit make this suitable for activation now.'][i%3]}</p></div></div>`).join('');}
+function renderPlan(){const o=selectedOpp;$('planName').value=currentBrand.name+' — '+o.title;$('planObjective').value=o.play+'. '+o.text;const today=new Date(),end=new Date();end.setDate(today.getDate()+7);$('planStart').value=today.toISOString().slice(0,10);$('planEnd').value=end.toISOString().slice(0,10);let acts=[`Publish a rapid-response content package around “${o.title}”`,`Activate targeted media / creator outreach using supporting evidence`,`Track signal lift, share of voice and audience response`,`Review performance after 24–48 hours and optimize`];$('recommendedActions').innerHTML=acts.map((a,i)=>`<label class="action-check"><input type="checkbox" checked><div><b>${a}</b><span>${['Priority action generated from Radar recommendation','Target the channels driving the strongest signal','Baseline before activation and monitor movement','Use monitoring feedback to adjust the play'][i]}</span></div></label>`).join('')}
+function showPage(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+p).classList.add('active');document.querySelectorAll('.nav-item[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===p));const names={radar:'Radar',detail:'Opportunity Depth',plan:'Action Plan',monitor:'Activated Opportunities',engine:'Engine Expansion'};$('lastUpdated').dataset.page=names[p]||'';if(p==='plan')renderPlan();if(p==='monitor')renderMonitor();window.scrollTo({top:0,behavior:'smooth'})}
+function activatePlan(){let item={id:Date.now(),brand:currentBrand.name,title:selectedOpp.title,type:selectedOpp.type,owner:$('planOwner').value,kpi:$('planKpi').value,progress:8+Math.round(Math.random()*7),impact:1.2+Math.random()*1.7,status:'Active',next:'First signal review',channel:selectedOpp.evidence.slice(0,2).join(' + '),score:selectedOpp.score};activated.unshift(item);showToast('Action plan activated');showPage('monitor')}
+function renderMonitor(){
+ $('activePlans').textContent=activated.length;let avg=activated.length?Math.round(activated.reduce((s,a)=>s+a.progress,0)/activated.length):0;$('avgProgress').textContent=avg+'%';let imp=activated.length?(activated.reduce((s,a)=>s+a.impact,0)/activated.length).toFixed(1):'0';$('impactValue').textContent='+'+imp+'%';
+ $('activationList').innerHTML=activated.length?activated.map(a=>`<div class="activation"><div class="activation-top"><div><div class="opp-title">${a.brand} — ${a.title}<span class="type">${a.type}</span></div><div class="opp-desc">Activated from Opportunity Radar with score ${a.score}. Monitoring execution and signal response against the activation baseline.</div></div><span class="status ${a.progress<20?'warn':''}">${a.progress<20?'Just activated':'Active'}</span></div><div class="progress"><div style="width:${a.progress}%"></div></div><div class="activation-meta"><div><small>Progress</small><b>${a.progress}%</b></div><div><small>Owner</small><b>${a.owner}</b></div><div><small>Primary KPI</small><b>${a.kpi}</b></div><div><small>Signal impact</small><b class="impact-up">+${a.impact.toFixed(1)}%</b></div><div><small>Next milestone</small><b>${a.next}</b></div></div></div>`).join(''):'<div class="empty">No activated opportunities yet. Create an action plan to start monitoring.</div>';
+}
+function liveTick(){tick++;currentBrand.metrics.signals=Math.max(5,currentBrand.metrics.signals+(Math.random()-.45)*.12);currentBrand.metrics.media=Math.max(5,Math.round(currentBrand.metrics.media+(Math.random()-.45)*2));currentBrand.metrics.social=Math.max(8,Math.round(currentBrand.metrics.social+(Math.random()-.45)*2));currentBrand.metrics.creator=Math.max(5,Math.round(currentBrand.metrics.creator+(Math.random()-.45)*2));activated.forEach(a=>{a.progress=Math.min(100,a.progress+(Math.random()<.6?1:0));a.impact=Math.max(0,a.impact+(Math.random()-.35)*.18)});$('lastUpdated').textContent='Signals updated '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · '+(timeframe==='live'?'Live':timeframe==='7d'?'7-day view':'30-day view');renderAll();if($('page-monitor').classList.contains('active'))renderMonitor()}
+
+function resetFeedbackForm(){$('feedbackStatus').classList.remove('show');$('feedbackTrigger').classList.remove('active')}
+$('feedbackTrigger').onclick=()=>{const open=$('feedbackPanel').classList.toggle('show');$('feedbackTrigger').classList.toggle('active',open);$('feedbackStatus').classList.remove('show')};
+$('closeFeedback').onclick=()=>{$('feedbackPanel').classList.remove('show');$('feedbackTrigger').classList.remove('active')};
+document.querySelectorAll('#quickFeedback .quick-feedback-btn').forEach(btn=>btn.onclick=()=>{const outcome=btn.dataset.feedback;const item={timestamp:new Date().toISOString(),brand:currentBrand.name,opportunity:selectedOpp.title,currentType:selectedOpp.type,outcome};const history=JSON.parse(localStorage.getItem('opportunityRadarFeedback')||'[]');history.unshift(item);localStorage.setItem('opportunityRadarFeedback',JSON.stringify(history.slice(0,100)));$('feedbackStatus').textContent=outcome+' captured for training';$('feedbackStatus').classList.add('show');showToast(outcome+' feedback captured')});
+
+$('typeFilter').onchange=e=>{opportunityFilter=e.target.value;const list=filteredOpportunities();if(list.length&&!list.some(x=>x.o===selectedOpp))selectedOpp=list[0].o;renderAll();showToast(opportunityFilter==='All Opportunities'?'Showing all opportunities':`Filtered to ${opportunityFilter}`)};
+$('timeFilter').onchange=e=>{timeframe=e.target.value;const list=filteredOpportunities();if(list.length&&!list.some(x=>x.o===selectedOpp))selectedOpp=list[0].o;renderAll();showToast(`Timeframe: ${e.target.options[e.target.selectedIndex].text}`)};
+$('brandBtn').onclick=()=>$('brandMenu').classList.toggle('show');
+$('addBrandBtn').onclick=()=>{$('brandMenu').classList.remove('show');$('brandModal').classList.add('show')};$('cancelBrand').onclick=()=>$('brandModal').classList.remove('show');
+$('saveBrand').onclick=()=>{let name=$('newBrandName').value.trim(),industry=$('newBrandIndustry').value.trim();if(!name||!industry){showToast('Enter brand name and industry');return}let id=name.toLowerCase().replace(/[^a-z0-9]+/g,'-');let base=JSON.parse(JSON.stringify(brandData[0]));base.id=id;base.name=name;base.industry=industry;base.logo='';base.metrics={signals:9.5+Math.random()*10,opps:5+Math.floor(Math.random()*4),score:76+Math.floor(Math.random()*10),window:3+Math.random()*4,media:25+Math.floor(Math.random()*30),social:30+Math.floor(Math.random()*35),creator:20+Math.floor(Math.random()*35),ai:10+Math.floor(Math.random()*15)};base.opps=base.opps.map((o,i)=>({...o,title:[`Rising demand signal in ${industry}`,`Competitor messaging gap in ${industry}`,`Creator whitespace for ${name}`][i],desc:`Live-style demo signals indicate a new ${industry.toLowerCase()} opportunity for ${name}.`}));brands.push(base);$('newBrandName').value='';$('newBrandIndustry').value='';$('brandModal').classList.remove('show');selectBrand(id);showToast(name+' added')};
+$('inspectTop').onclick=()=>{selectedOpp=currentBrand.opps[0];renderDetail();showPage('detail')};$('backRadar').onclick=()=>showPage('radar');$('createPlan').onclick=()=>showPage('plan');$('backDetail').onclick=()=>showPage('detail');$('activatePlan').onclick=activatePlan;$('newScan').onclick=()=>showPage('radar');
+document.querySelectorAll('.nav-item[data-page]').forEach(x=>x.onclick=()=>showPage(x.dataset.page));document.addEventListener('click',e=>{if(!e.target.closest('.brand-wrap'))$('brandMenu').classList.remove('show')});
+renderAll();renderMonitor();setInterval(liveTick,5000);
+</script>
+
+
+<script>
+(function(){
+  const q=(sel)=>document.querySelector(sel);
+  const overlay=q('#demoOverlay'), spot=q('#demoSpotlight'), card=q('#demoCard');
+  const title=q('#demoTitle'), textEl=q('#demoText'), count=q('#demoStepCount'), eyebrow=q('#demoEyebrow');
+  const btn=q('#demoModeBtn'), playBtn=q('#demoPlayPause'), progress=q('#demoProgressBar');
+  if(!overlay||!btn) return;
+  let demoIndex=0, demoPlaying=false, demoTimer=null, resizeTimer=null;
+  const STEP_MS=5200;
+  const steps=[
+    {intro:true,page:'radar',target:null,title:'Opportunity Radar',text:'Opportunity Radar is an AI-powered opportunity intelligence layer designed to turn Meltwater signals into clear, prioritized opportunities and a path to action. It connects Media Intelligence, Social Listening, Creator Intelligence, Competitive Intelligence and GenAI Lens, then helps teams detect opportunities, prioritize what matters, explain why it matters, act on it, monitor impact and learn from human feedback.',label:'Project overview'},
+    {page:'radar',target:'#page-radar .hero',title:'Radar: find where the brand can win next',text:'Opportunity Radar combines media, social, creator, competitive and GenAI visibility signals to surface prioritized opportunities instead of leaving users to connect signals manually.',label:'1 · Discover'},
+    {page:'radar',target:'.brand-wrap',title:'Switch between brands',text:'Choose a brand workspace from the selector. The prototype includes Nike, Tesla, Netflix, Microsoft, Coca-Cola and Boeing, each with its own industry context and opportunity set.',label:'2 · Brand context'},
+    {page:'radar',target:'#page-radar .filters',title:'Filter the opportunity landscape',text:'Narrow the Radar by opportunity type and timeframe. Users can focus on Emerging Demand, Competitor Weakness, Creator Opportunity, PR Opportunity or Content Whitespace across Live, 7-day and 30-day views.',label:'3 · Focus'},
+    {page:'radar',target:'#oppList .opp-card:first-child',title:'Prioritized opportunities',text:'Every opportunity is ranked using an Opportunity Score and supported by concise signal evidence. The goal is to direct attention to what matters most now—not simply show more data.',label:'4 · Prioritize'},
+    {page:'detail',target:'#page-detail .detail-grid',title:'Opportunity Depth explains the “why”',text:'Open an opportunity to review its reasoning, urgency, brand fit, potential reach, action window, evidence sources and recommended play. This makes the recommendation explainable and reviewable.',label:'5 · Understand'},
+    {page:'detail',target:'.feedback-wrap',before:function(){const p=q('#feedbackPanel'); if(p) p.classList.add('show'); const f=q('#feedbackTrigger'); if(f) f.classList.add('active');},title:'Human feedback closes the learning loop',text:'Use the flag to Accept, Refine, Snooze or Dismiss an opportunity. In a production system these signals could improve ranking quality, timing and personalization over time.',label:'6 · Learn'},
+    {page:'plan',target:'#page-plan .detail-grid',title:'Turn intelligence into an Action Plan',text:'Opportunity Radar converts the selected opportunity into an executable plan with an owner, dates, objective, recommended activities and a measurable KPI.',label:'7 · Plan'},
+    {page:'plan',target:'#activatePlan',title:'Activate the opportunity',text:'Once the plan is ready, activate it directly from the workflow. This bridges the gap between insight and execution.',label:'8 · Activate'},
+    {page:'monitor',target:'#page-monitor .activation-list',before:function(){if(typeof activated!=="undefined"&&activated.length===0){try{activatePlan();}catch(e){}}},title:'Monitor Activated Opportunities',text:'After activation, track execution progress, the owner, KPI, signal impact and next milestone so the opportunity remains measurable after the recommendation is acted on.',label:'9 · Measure'},
+    {page:'engine',target:'#page-engine .engine-hero',title:'Engine Expansion',text:'The expansion view shows how GenAI Lens and Competitive Intelligence can strengthen the Opportunity Radar Engine—adding AI visibility gaps, competitor moves, positioning gaps and response windows to the signal mix.',label:'10 · Expand'}
+  ];
+  function clearTimer(){if(demoTimer){clearTimeout(demoTimer);demoTimer=null;}}
+  function schedule(){clearTimer();if(demoPlaying)demoTimer=setTimeout(()=>{if(demoIndex<steps.length-1){demoIndex++;showStep();}else{pauseDemo();}},STEP_MS)}
+  function pauseDemo(){demoPlaying=false;clearTimer();playBtn.textContent='▶ Play';playBtn.title='Continue demo'}
+  function playDemo(){demoPlaying=true;playBtn.textContent='Ⅱ Pause';playBtn.title='Pause demo';schedule()}
+  function placeCard(rect){const margin=18,w=Math.min(390,window.innerWidth-32),h=card.offsetHeight||150;let left=rect.right+18,top=rect.top;if(left+w>window.innerWidth-margin)left=Math.max(margin,rect.left-w-18);if(left<margin)left=margin;if(top+h>window.innerHeight-72)top=Math.max(margin,window.innerHeight-h-82);if(top<margin)top=margin;card.style.left=left+'px';card.style.top=top+'px';card.style.right='auto';card.style.bottom='auto'}
+  function focusTarget(target){const el=typeof target==='string'?q(target):target;if(!el)return;el.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'});setTimeout(()=>{const r=el.getBoundingClientRect(),pad=7;spot.style.left=Math.max(5,r.left-pad)+'px';spot.style.top=Math.max(5,r.top-pad)+'px';spot.style.width=Math.min(window.innerWidth-10,r.width+pad*2)+'px';spot.style.height=Math.min(window.innerHeight-10,r.height+pad*2)+'px';spot.style.borderRadius=(parseFloat(getComputedStyle(el).borderRadius)||12)+8+'px';placeCard(r)},260)}
+  function showStep(){const st=steps[demoIndex];document.body.classList.toggle('demo-intro',!!st.intro);if(st.page&&typeof showPage==='function')showPage(st.page);const fp=q('#feedbackPanel');if(fp&&demoIndex!==6)fp.classList.remove('show');const ft=q('#feedbackTrigger');if(ft&&demoIndex!==6)ft.classList.remove('active');eyebrow.textContent=st.label||'Guided demo';title.textContent=st.title;textEl.textContent=st.text;count.textContent=(demoIndex+1)+' / '+steps.length;progress.style.width=((demoIndex+1)/steps.length*100)+'%';if(st.intro){clearTimer();demoPlaying=false;playBtn.textContent='▶ Play';spot.style.left='0';spot.style.top='0';spot.style.width='100vw';spot.style.height='100vh';return}if(st.before)setTimeout(()=>{st.before();focusTarget(st.target)},120);else setTimeout(()=>focusTarget(st.target),120);schedule()}
+  function startDemo(){demoIndex=0;demoPlaying=false;document.body.classList.add('demo-running');overlay.classList.add('show');overlay.setAttribute('aria-hidden','false');btn.classList.add('active');btn.innerHTML='<span>■</span><span>Demo Running</span>';playBtn.textContent='▶ Play';try{document.body.classList.remove('sidebar-collapsed');localStorage.setItem('opportunityRadarSidebarCollapsed','0')}catch(e){}showStep()}
+  function exitDemo(){pauseDemo();overlay.classList.remove('show');overlay.setAttribute('aria-hidden','true');document.body.classList.remove('demo-running','demo-intro');btn.classList.remove('active');btn.innerHTML='<span>▶</span><span>Demo Mode</span>';const fp=q('#feedbackPanel');if(fp)fp.classList.remove('show');const ft=q('#feedbackTrigger');if(ft)ft.classList.remove('active')}
+  btn.addEventListener('click',()=>overlay.classList.contains('show')?exitDemo():startDemo());
+  q('#demoIntroStart').addEventListener('click',()=>{demoIndex=1;demoPlaying=true;showStep();playBtn.textContent='Ⅱ Pause';playBtn.title='Pause demo'});
+  q('#demoExit').addEventListener('click',exitDemo);q('#demoPrev').addEventListener('click',()=>{demoIndex=Math.max(0,demoIndex-1);showStep()});q('#demoNext').addEventListener('click',()=>{demoIndex=Math.min(steps.length-1,demoIndex+1);showStep()});q('#demoRestart').addEventListener('click',()=>{demoIndex=0;showStep()});playBtn.addEventListener('click',()=>demoPlaying?pauseDemo():playDemo());
+  document.addEventListener('keydown',e=>{if(!overlay.classList.contains('show'))return;if(e.key==='Escape')exitDemo();if(e.key==='ArrowRight'){demoIndex=Math.min(steps.length-1,demoIndex+1);showStep()}if(e.key==='ArrowLeft'){demoIndex=Math.max(0,demoIndex-1);showStep()}if(e.key===' '){e.preventDefault();demoPlaying?pauseDemo():playDemo()}});
+  window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(overlay.classList.contains('show')&&!steps[demoIndex].intro)focusTarget(steps[demoIndex].target)},120)})
+})();
+</script>
+
+<script>
+(function(){
+  const btn=document.getElementById('sidebarToggle');
+  if(!btn) return;
+  const key='opportunityRadarSidebarCollapsed';
+  const apply=(collapsed)=>{
+    document.body.classList.toggle('sidebar-collapsed',collapsed);
+    btn.textContent=collapsed?'›':'‹';
+    btn.setAttribute('aria-label',collapsed?'Expand sidebar':'Collapse sidebar');
+    btn.title=collapsed?'Expand sidebar':'Collapse sidebar';
+  };
+  try{ apply(localStorage.getItem(key)==='1'); }catch(e){ apply(false); }
+  btn.addEventListener('click',()=>{
+    const collapsed=!document.body.classList.contains('sidebar-collapsed');
+    apply(collapsed);
+    try{ localStorage.setItem(key,collapsed?'1':'0'); }catch(e){}
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,3 +1,9 @@
+## Current Prototype Files
+
+- **Live prototype / GitHub Pages:** `index.html` — now synced to the latest **V11 Teal** build.
+- **Archived latest full build:** `Meltwater_Opportunity_Radar_Prototype_Final_v11_Teal.html`.
+- **Video-preview compatible standalone build:** `Opportunity_Radar_Standalone_Video_Compatible.html` — no iframe or hosted-page dependency; external font references and embedded logo blobs removed for safer rendering in restricted preview environments.
+
 # Meltwater Opportunity Radar
 
 > **Hackathon prototype:** an AI-powered opportunity intelligence layer that turns Meltwater signals into prioritized opportunities, recommended actions, and measurable activation workflows.
